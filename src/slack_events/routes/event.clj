@@ -63,11 +63,8 @@
                    event-to-str)]
    (post-to-slack hook-url {:text event})))
 
-; (next-event-to-slack "Ruby-On-Rails-Oceania-Melbourne")
-
 (defn events [text]
-  ; (next-event-to-slack "Ruby-On-Rails-Oceania-Melbourne")
-  (let [event ( -> "Ruby-On-Rails-Oceania-Melbourne"
+  (let [event ( -> text
                    next-event
                    event-to-str)]
   {:status 200
