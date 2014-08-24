@@ -4,6 +4,8 @@
 
 A slack integration for keeping track of meetup.com events.
 
+Based loosely off of [this tutorial](http://udayv.com//clojure/2014/08/21/writing-hooks-for-slack-in-clojure/)
+
 ## Prerequisites
 
 You will need [Leiningen][1] 1.7.0 or above installed.
