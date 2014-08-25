@@ -7,6 +7,9 @@
             [clj-time.format :as f]
             [clj-time.coerce :as c]))
 
+(def slack-token
+  (env :slack-token))
+
 (def hook-url
   (env :slack-url))
 
@@ -63,13 +66,20 @@
                    event-to-str)]
    (post-to-slack hook-url {:text event})))
 
-(defn events [text]
-  (let [event ( -> text
-                   next-event
-                   event-to-str)]
-  {:status 200
-   :content-type "text/plain"
-   :body event}))
+(defn events [params]
+  (if (and (= "/events" (:command params))
+           (= slack-token (:token params)))
+    (do
+      (let [event ( -> (:text params)
+                       next-event
+                       event-to-str)]
+      {:status 200
+       :content-type "text/plain"
+       :body event}))
+      {:status 400
+       :content-type "text/plain"
+       :body "Nope."}))
+
 
 (defroutes event-routes
-  (POST "/events" [text] (events text)))
+  (POST "/events" {:keys [params] :as request} (events params)))
