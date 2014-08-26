@@ -51,8 +51,12 @@
 
 (def date-time-format (f/formatter "d MMMM yyyy HH:mm"))
 
+(defn event-time [e]
+  (let [offset-time (+ (:time e) (:utc-offset e))]
+    (f/unparse date-time-format (c/from-long offset-time))))
+
 (defn event-to-str [e]
-  (str (:name e) " at " (:venue e) " on " (f/unparse date-time-format (c/from-long (+ (:time e) (:utc-offset e)))) ", details: " (:event-url e)))
+  (str (:name e) " at " (:venue e) " on " (event-time e) ", details: " (:event-url e)))
 
 (defn post-to-slack [url msg]
   (let [m (merge {:username "Event Bot"
