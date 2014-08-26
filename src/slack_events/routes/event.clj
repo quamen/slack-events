@@ -22,9 +22,9 @@
 
 (defn meetup-for-group [group]
   (let [content (-> (str "https://api.meetup.com/"
-                          group
-                          "?sign=true&key="
-                          meetup-api-key)
+                         group
+                         "?sign=true&key="
+                         meetup-api-key)
                     client/get
                     :body
                     json/read-str
@@ -33,9 +33,9 @@
 
 (defn next-event [group]
   (let [content (-> (str "https://api.meetup.com/2/event/"
-                          (:next-event-id (meetup-for-group group))
-                          "?sign=true&key="
-                          meetup-api-key)
+                         (:next-event-id (meetup-for-group group))
+                         "?sign=true&key="
+                         meetup-api-key)
                     client/get
                     :body
                     json/read-str
@@ -57,28 +57,28 @@
 (defn post-to-slack [url msg]
   (let [m (merge {:username "Event Bot"
                   :icon_emoji ":zap:"} msg)]
-  (client/post url {:body (json/write-str m)
-                    :content-type :json})))
+    (client/post url {:body (json/write-str m)
+                      :content-type :json})))
 
 (defn next-event-to-slack [group]
   (let [event ( -> group
-                   next-event
-                   event-to-str)]
-   (post-to-slack hook-url {:text event})))
+                next-event
+                event-to-str)]
+    (post-to-slack hook-url {:text event})))
 
 (defn events [params]
   (if (and (= "/events" (:command params))
            (= slack-token (:token params)))
     (do
       (let [event ( -> (:text params)
-                       next-event
-                       event-to-str)]
-      {:status 200
-       :content-type "text/plain"
-       :body event}))
-      {:status 400
-       :content-type "text/plain"
-       :body "Nope."}))
+                    next-event
+                    event-to-str)]
+        {:status 200
+         :content-type "text/plain"
+         :body event}))
+    {:status 400
+     :content-type "text/plain"
+     :body "Nope."}))
 
 
 (defroutes event-routes
