@@ -16,6 +16,8 @@
 (def meetup-api-key
   (env :meetup-api-key))
 
+(def meetup-groups (atom ()))
+
 (defn pull-values [m val-map]
   (into {} (for [[k v] val-map]
              [k (get-in m (if (sequential? v) v [v]))])))
@@ -29,6 +31,8 @@
                     :body
                     json/read-str
                     (pull-values {:next-event-id ["next_event" "id"]}))]
+    (swap! meetup-groups conj group)
+    (swap! meetup-groups distinct)
     content))
 
 (defn next-event [group]
@@ -70,16 +74,24 @@
                 event-to-str)]
     (post-to-slack hook-url {:text event})))
 
+(defn handle-events-command [params]
+  (cond
+    (= "" (:text params)) "please provide a meetup group name"
+    (= "list" (:text params)) (reduce str (map (fn [m]
+                                                 ( -> m
+                                                      (str ", "))) @meetup-groups ))
+    :else ( -> (:text params)
+               next-event
+               event-to-str)))
+
 (defn events [params]
   (if (and (= "/events" (:command params))
            (= slack-token (:token params)))
     (do
-      (let [event ( -> (:text params)
-                    next-event
-                    event-to-str)]
+      (let [response (handle-events-command params)]
         {:status 200
          :content-type "text/plain"
-         :body event}))
+         :body response}))
     {:status 400
      :content-type "text/plain"
      :body "Nope."}))
