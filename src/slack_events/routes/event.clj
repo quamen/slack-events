@@ -5,7 +5,8 @@
             [clojure.data.json :as json]
             [clj-time.core :as t]
             [clj-time.format :as f]
-            [clj-time.coerce :as c]))
+            [clj-time.coerce :as c]
+            [taoensso.carmine :as car :refer (wcar)]))
 
 (def slack-token
   (env :slack-token))
@@ -16,7 +17,18 @@
 (def meetup-api-key
   (env :meetup-api-key))
 
-(def meetup-groups (atom ()))
+(def redis-uri
+  (env :redis-uri))
+
+(def redis {:pool {} :spec {:uri redis-uri}}) ; See `wcar` docstring for opts
+(defmacro wcar* [& body] `(car/wcar redis ~@body))
+
+(def meetup-groups
+  (let [groups (wcar* (car/get "meetup-groups"))]
+    (if (= groups "")
+      (wcar* (car/set "meetup-groups" (atom ())))
+      (atom ()))
+    groups))
 
 (defn pull-values [m val-map]
   (into {} (for [[k v] val-map]

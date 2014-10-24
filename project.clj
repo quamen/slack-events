@@ -9,7 +9,8 @@
                  [clj-time "0.8.0"]
                  [compojure "1.1.6"]
                  [environ "1.0.0"]
-                 [ring-server "0.3.1"]]
+                 [ring-server "0.3.1"]
+                 [com.taoensso/carmine "2.7.0"]]
   :plugins [[lein-environ "1.0.0"]
             [lein-ring "0.8.11"]]
   :ring {:handler slack-events.handler/app
